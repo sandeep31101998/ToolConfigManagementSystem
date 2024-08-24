@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Tool Configuration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], select {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+		.required-field::after {
+				     content: ' *';
+				     color: red;
+				   }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Edit Tool Configuration</h1>
+        <form id="updateForm">
+            <label for="fileName" class="required-field">File Name</label>
+            <input type="text" id="fileName" name="fileName" required>
+
+            <label for="name" class="required-field">Name</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="instruction1" class="required-field">Instruction 1</label>
+            <input type="text" id="instruction1" name="instruction1" required>
+
+            <label for="instruction2">Instruction 2</label>
+            <input type="text" id="instruction2" name="instruction2">
+
+            <label for="findPattern">Find Pattern</label>
+            <input type="text" id="findPattern" name="findPattern">
+
+            <label for="findNotPattern">Find Not Pattern</label>
+            <input type="text" id="findNotPattern" name="findNotPattern">
+
+            <label for="completeEnable">Complete Enable</label>
+            <select id="completeEnable" name="completeEnable" required>
+                <option value="Yes">yes</option>
+                <option value="No">no</option>
+            </select>
+
+            <label for="skipPausePlay">Skip Pause Play</label>
+            <select id="skipPausePlay" name="skipPausePlay" required>
+                <option value="Yes">yes</option>
+                <option value="No">no</option>
+            </select>
+
+            <label for="category" class="required-field">Category</label>
+            <input type="text" id="category" name="category">
+
+            <label for="include">Include</label>
+            <input type="text" id="include" name="include">
+
+            <label for="validation_UI">Validation UI</label>
+            <input type="text" id="validation_UI" name="validation_UI">
+
+            <button type="button" onclick="updateTool()">Update</button>
+        </form>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateId = localStorage.getItem('updateId');
+            if (!updateId) {
+                alert('No tool selected for update.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            fetch(`http://localhost:8080/api/tools/${updateId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('fileName').value = data.fileName;
+                    document.getElementById('name').value = data.name;
+                    document.getElementById('instruction1').value = data.instruction1;
+                    document.getElementById('instruction2').value = data.instruction2;
+                    document.getElementById('findPattern').value = data.findPattern;
+                    document.getElementById('findNotPattern').value = data.findNotPattern;
+                    document.getElementById('completeEnable').value = data.completeEnable || 'No';
+                    document.getElementById('skipPausePlay').value = data.skipPausePlay || 'No';
+                    document.getElementById('category').value = data.category;
+                    document.getElementById('include').value = data.include;
+                    document.getElementById('validation_UI').value = data.validation_UI;
+                })
+                .catch(error => {
+                    console.error('Error fetching tool data:', error);
+                    showMessage('Error fetching tool data. Please try again later.', 'error');
+                });
+        });
+
+        function updateTool() {
+            const updateId = localStorage.getItem('updateId');
+            const formData = {
+                id: updateId,
+                fileName: document.getElementById('fileName').value,
+                name: document.getElementById('name').value,
+                instruction1: document.getElementById('instruction1').value,
+                instruction2: document.getElementById('instruction2').value,
+                findPattern: document.getElementById('findPattern').value,
+                findNotPattern: document.getElementById('findNotPattern').value,
+                completeEnable: document.getElementById('completeEnable').value,
+                skipPausePlay: document.getElementById('skipPausePlay').value,
+                category: document.getElementById('category').value,
+                include: document.getElementById('include').value,
+                validation_UI: document.getElementById('validation_UI').value
+            };
+
+            fetch(`http://localhost:8080/api/tools/update`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    showMessage('Tool updated successfully.', 'success');
+                    window.location.href = "index.html"; 
+                } else {
+                    showMessage('Error updating tool. Please try again later.', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating tool:', error);
+                showMessage('Error updating tool. Please try again later.', 'error');
+            });
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+        }
+    </script>
+</body>
+</html>

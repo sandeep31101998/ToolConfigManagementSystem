@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .detail-container {
+            display: flex;
+            flex-direction: column;
+        }
+        .detail-container label {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        textarea {
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            width: 100%;
+            box-sizing: border-box;
+            min-height: 100px; /* Set a minimum height */
+            resize: vertical; /* Allow vertical resizing */
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007BFF;
+            color: #fff;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Tool Details</h1>
+        <div class="detail-container">
+            <label for="fileName">File Name</label>
+            <textarea id="fileName" readonly></textarea>
+
+            <label for="name">Name</label>
+            <textarea id="name" readonly></textarea>
+
+            <label for="instruction1">Instruction 1</label>
+            <textarea id="instruction1" readonly></textarea>
+
+            <label for="instruction2">Instruction 2</label>
+            <textarea id="instruction2" readonly></textarea>
+
+            <label for="findPattern">Find Pattern</label>
+            <textarea id="findPattern" readonly></textarea>
+
+            <label for="findNotPattern">Find Not Pattern</label>
+            <textarea id="findNotPattern" readonly></textarea>
+
+            <label for="completeEnable">Complete Enable</label>
+            <textarea id="completeEnable" readonly></textarea>
+
+            <label for="skipPausePlay">Skip Pause Play</label>
+            <textarea id="skipPausePlay" readonly></textarea>
+
+            <label for="category">Category</label>
+            <textarea id="category" readonly></textarea>
+
+            <label for="include">Include</label>
+            <textarea id="include" readonly></textarea>
+
+            <label for="validation_UI">Validation UI</label>
+            <textarea id="validation_UI" readonly></textarea>
+        </div>
+        <button onclick="window.location.href='index.html'">Back to Index</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const detailId = localStorage.getItem('detailId');
+            if (!detailId) {
+                alert('No tool selected for detail view.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            fetch(`http://localhost:8080/api/tools/${detailId}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('fileName').value = data.fileName || 'N/A';
+                    document.getElementById('name').value = data.name || 'N/A';
+                    document.getElementById('instruction1').value = data.instruction1 || 'N/A';
+                    document.getElementById('instruction2').value = data.instruction2 || 'N/A';
+                    document.getElementById('findPattern').value = data.findPattern || 'N/A';
+                    document.getElementById('findNotPattern').value = data.findNotPattern || 'N/A';
+                    document.getElementById('completeEnable').value = data.completeEnable || 'N/A';
+                    document.getElementById('skipPausePlay').value = data.skipPausePlay || 'N/A';
+                    document.getElementById('category').value = data.category || 'N/A';
+                    document.getElementById('include').value = data.include || 'N/A';
+                    document.getElementById('validation_UI').value = data.validation_UI || 'N/A';
+                })
+                .catch(error => {
+                    console.error('Error fetching tool data:', error);
+                    showMessage('Error fetching tool data. Please try again later.', 'error');
+                });
+        });
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = message;
+            messageDiv.className = `message ${type}`;
+        }
+    </script>
+</body>
+</html>
